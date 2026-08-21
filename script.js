@@ -35,14 +35,10 @@ let running = false;
 // ========================================
 
 const blurSound =
-    new Audio("sounds/blur.mp3");
-
-const suaraAwal =
-    new Audio("sounds/blurlengkap.mp3");
+    new Audio("sounds/blur.mp3")
 
 blurSound.volume = 1;
 
-suaraAwal.volume = 1;
 
 
 // ========================================
@@ -411,26 +407,6 @@ async function mulaiKamera() {
         status.textContent =
             "Kamera aktif";
 
-
-        // =================================
-        // MAIN SOUND AWAL
-        // =================================
-
-        suaraAwal.currentTime = 0;
-
-        suaraAwal.play()
-            .catch(
-                function(error) {
-
-                    console.log(
-                        "Sound awal gagal:",
-                        error
-                    );
-
-                }
-            );
-
-
         // =================================
         // MULAI DETEKSI
         // =================================
@@ -552,15 +528,6 @@ function stopKamera() {
     blurSound.pause();
 
     blurSound.currentTime = 0;
-
-
-    // =================================
-    // STOP SOUND AWAL
-    // =================================
-
-    suaraAwal.pause();
-
-    suaraAwal.currentTime = 0;
 
 
     // =================================
