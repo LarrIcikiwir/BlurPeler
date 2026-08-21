@@ -17,6 +17,9 @@ const startBtn =
 const stopBtn =
     document.getElementById("stopBtn");
 
+const status =
+    document.getElementById("status");
+
 
 // ========================================
 // CAMERA
@@ -28,219 +31,51 @@ let running = false;
 
 
 // ========================================
-// GESTURE
-// ========================================
-
-let lastGesture = "NORMAL";
-
-
-// ========================================
 // AUDIO
 // ========================================
-
-// Sound saat gesture V
 
 const blurSound =
     new Audio("sounds/blur.mp3");
 
-blurSound.volume = 1.0;
-
-
-// Sound saat kamera mulai
-
 const suaraAwal =
     new Audio("sounds/blurlengkap.mp3");
 
-suaraAwal.volume = 1.0;
+blurSound.volume = 1;
+
+suaraAwal.volume = 1;
 
 
 // ========================================
-// KONTROL SOUND
+// STATUS SOUND
 // ========================================
-
-// Apakah blur.mp3 boleh dimainkan
 
 let bolehBunyi = true;
 
+let blurSedangJalan = false;
 
-// Apakah blur.mp3 sedang berjalan
-
-let sedangBunyi = false;
-
-
-// Apakah efek blur sedang aktif
-
-let blurAktif = false;
+let timerBlur = null;
 
 
 // ========================================
-// AUDIO CONTEXT
+// GESTURE
 // ========================================
 
-let audioContext = null;
-
-
-function setupAudio() {
-
-    if (audioContext) {
-
-        return;
-
-    }
-
-
-    audioContext =
-        new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
-
-}
-
-
-// ========================================
-// SOUND BLUR
-// ========================================
-
-async function playBlurSound() {
-
-    // Kalau masih cooldown
-    // jangan bunyi
-
-    if (!bolehBunyi) {
-
-        return;
-
-    }
-
-
-    // Kalau sound masih berjalan
-    // jangan mulai lagi
-
-    if (!blurSound.paused) {
-
-        return;
-
-    }
-
-
-    setupAudio();
-
-
-    // Aktifkan audio
-
-    if (
-        audioContext.state ===
-        "suspended"
-    ) {
-
-        await audioContext.resume();
-
-    }
-
-
-    // Kunci sound
-
-    bolehBunyi = false;
-
-    sedangBunyi = true;
-
-    blurAktif = true;
-
-
-    // Aktifkan blur
-
-    video.classList.add(
-        "blur"
-    );
-
-
-    // Mulai sound dari awal
-
-    blurSound.currentTime = 0;
-
-
-    try {
-
-        await blurSound.play();
-
-    }
-
-    catch (error) {
-
-        console.log(
-            "Sound gagal dimainkan:",
-            error
-        );
-
-
-        bolehBunyi = true;
-
-        sedangBunyi = false;
-
-        blurAktif = false;
-
-
-        video.classList.remove(
-            "blur"
-        );
-
-
-        return;
-
-    }
-
-
-    // ====================================
-    // SOUND SELESAI
-    // ====================================
-
-    blurSound.onended =
-        function() {
-
-            sedangBunyi = false;
-
-
-            // Tunggu 1 detik
-
-            setTimeout(
-                function() {
-
-                    // Matikan blur
-
-                    blurAktif = false;
-
-                    video.classList.remove(
-                        "blur"
-                    );
-
-
-                    // Sound boleh dimainkan lagi
-
-                    bolehBunyi = true;
-
-                },
-                1000
-            );
-
-        };
-
-}
+let gestureTerakhir = "NORMAL";
 
 
 // ========================================
 // CEK JARI
 // ========================================
 
-function fingerUp(
-    hand,
-    tip,
-    pip
+function jariNaik(
+    tangan,
+    ujung,
+    pangkal
 ) {
 
     return (
-        hand[tip].y <
-        hand[pip].y
+        tangan[ujung].y <
+        tangan[pangkal].y
     );
 
 }
@@ -250,57 +85,46 @@ function fingerUp(
 // DETEKSI GESTURE
 // ========================================
 
-function detectGesture(hand) {
+function cekGesture(tangan) {
 
-    // Telunjuk
-
-    const index =
-        fingerUp(
-            hand,
+    const telunjuk =
+        jariNaik(
+            tangan,
             8,
             6
         );
 
-
-    // Jari tengah
-
-    const middle =
-        fingerUp(
-            hand,
+    const tengah =
+        jariNaik(
+            tangan,
             12,
             10
         );
 
-
-    // Jari manis
-
-    const ring =
-        fingerUp(
-            hand,
+    const manis =
+        jariNaik(
+            tangan,
             16,
             14
         );
 
-
-    // Kelingking
-
-    const pinky =
-        fingerUp(
-            hand,
+    const kelingking =
+        jariNaik(
+            tangan,
             20,
             18
         );
 
 
-    // ====================================
-    // ✌️ V SIGN
-    // ====================================
+    // ==============================
+    // V SIGN
+    // ==============================
 
     if (
-        index &&
-        middle &&
-        !ring &&
-        !pinky
+        telunjuk &&
+        tengah &&
+        !manis &&
+        !kelingking
     ) {
 
         return "V";
@@ -308,31 +132,129 @@ function detectGesture(hand) {
     }
 
 
-    // ====================================
-    // NORMAL
-    // ====================================
-
     return "NORMAL";
 
 }
 
 
 // ========================================
-// MEDIAPIPE HANDS
+// BLUR + SOUND
+// ========================================
+
+function mulaiBlur() {
+
+    // Kalau sound masih jalan
+    // jangan mulai lagi
+
+    if (blurSedangJalan) {
+
+        return;
+
+    }
+
+
+    // Kalau masih cooldown
+
+    if (!bolehBunyi) {
+
+        return;
+
+    }
+
+
+    // ====================================
+    // AKTIFKAN BLUR
+    // ====================================
+
+    video.classList.add(
+        "blur"
+    );
+
+
+    blurSedangJalan = true;
+
+    bolehBunyi = false;
+
+
+    // Hapus timer lama
+
+    if (timerBlur) {
+
+        clearTimeout(timerBlur);
+
+    }
+
+
+    // ====================================
+    // MAIN SOUND
+    // ====================================
+
+    blurSound.currentTime = 0;
+
+    blurSound.play()
+        .catch(function(error) {
+
+            console.log(
+                "Sound gagal:",
+                error
+            );
+
+        });
+
+
+    // ====================================
+    // TUNGGU SOUND SELESAI
+    // ====================================
+
+    blurSound.onended =
+        function() {
+
+            blurSedangJalan = false;
+
+
+            // Tunggu 1 detik
+
+            timerBlur =
+                setTimeout(
+                    function() {
+
+                        // Matikan blur
+
+                        video.classList.remove(
+                            "blur"
+                        );
+
+
+                        // Boleh bunyi lagi
+
+                        bolehBunyi = true;
+
+                    },
+                    1000
+                );
+
+        };
+
+}
+
+
+// ========================================
+// MEDIAPIPE
 // ========================================
 
 const hands =
     new Hands({
 
-        locateFile: function(file) {
+        locateFile:
+            function(file) {
 
-            return (
-                "https://cdn.jsdelivr.net/npm/" +
-                "@mediapipe/hands/" +
-                file
-            );
+                return (
+                    "https://cdn.jsdelivr.net/npm/" +
+                    "@mediapipe/hands/" +
+                    file
+                );
 
-        }
+            }
 
     });
 
@@ -351,13 +273,11 @@ hands.setOptions({
 
 
 // ========================================
-// HASIL DETEKSI TANGAN
+// HASIL DETEKSI
 // ========================================
 
 hands.onResults(
     function(results) {
-
-        // Kamera belum siap
 
         if (!video.videoWidth) {
 
@@ -366,7 +286,9 @@ hands.onResults(
         }
 
 
-        // Ukuran canvas
+        // =================================
+        // UKURAN CANVAS
+        // =================================
 
         canvas.width =
             video.videoWidth;
@@ -374,8 +296,6 @@ hands.onResults(
         canvas.height =
             video.videoHeight;
 
-
-        // Bersihkan canvas
 
         ctx.clearRect(
             0,
@@ -394,16 +314,8 @@ hands.onResults(
             results.multiHandLandmarks.length === 0
         ) {
 
-            lastGesture =
+            gestureTerakhir =
                 "NORMAL";
-
-
-            /*
-                JANGAN hapus blur di sini.
-
-                Blur dikontrol oleh
-                durasi blur.mp3.
-            */
 
             return;
 
@@ -414,49 +326,32 @@ hands.onResults(
         // AMBIL TANGAN
         // =================================
 
-        const hand =
+        const tangan =
             results.multiHandLandmarks[0];
 
 
         // =================================
-        // DETEKSI
+        // CEK GESTURE
         // =================================
 
         const gesture =
-            detectGesture(hand);
+            cekGesture(tangan);
 
 
         // =================================
-        // ✌️ V
+        // V SIGN
         // =================================
 
         if (
             gesture === "V"
         ) {
 
-            /*
-                Fungsi ini otomatis
-                mencegah sound spam.
-            */
-
-            playBlurSound();
+            mulaiBlur();
 
         }
 
 
-        /*
-            Kalau bukan V, kita TIDAK
-            langsung menghapus blur.
-
-            Blur akan hilang setelah:
-
-            blur.mp3 selesai
-                    +
-                delay 1 detik
-        */
-
-
-        lastGesture =
+        gestureTerakhir =
             gesture;
 
     }
@@ -467,29 +362,12 @@ hands.onResults(
 // MULAI KAMERA
 // ========================================
 
-async function startCamera() {
+async function mulaiKamera() {
 
     try {
 
         // =================================
-        // AKTIFKAN AUDIO
-        // =================================
-
-        setupAudio();
-
-
-        if (
-            audioContext.state ===
-            "suspended"
-        ) {
-
-            await audioContext.resume();
-
-        }
-
-
-        // =================================
-        // MINTA KAMERA
+        // MINTA AKSES KAMERA
         // =================================
 
         stream =
@@ -498,19 +376,14 @@ async function startCamera() {
 
                     video: {
 
-                        facingMode:
-                            "user",
+                        facingMode: "user",
 
                         width: {
-
                             ideal: 1280
-
                         },
 
                         height: {
-
                             ideal: 720
-
                         }
 
                     },
@@ -520,7 +393,9 @@ async function startCamera() {
                 });
 
 
-        // Masukkan kamera
+        // =================================
+        // TAMPILKAN KAMERA
+        // =================================
 
         video.srcObject =
             stream;
@@ -530,11 +405,18 @@ async function startCamera() {
 
 
         // =================================
-        // SOUND KAMERA
+        // UPDATE STATUS
+        // =================================
+
+        status.textContent =
+            "Kamera aktif";
+
+
+        // =================================
+        // MAIN SOUND AWAL
         // =================================
 
         suaraAwal.currentTime = 0;
-
 
         suaraAwal.play()
             .catch(
@@ -550,31 +432,28 @@ async function startCamera() {
 
 
         // =================================
-        // MULAI PROSES
+        // MULAI DETEKSI
         // =================================
 
         running = true;
 
-
-        lastGesture =
+        gestureTerakhir =
             "NORMAL";
 
-
-        processCamera();
+        prosesKamera();
 
     }
 
-
     catch (error) {
 
-        console.error(
-            error
-        );
+        console.log(error);
 
+        status.textContent =
+            "Kamera gagal dibuka";
 
         alert(
             "Kamera tidak bisa dibuka. " +
-            "Pastikan izin kamera sudah diberikan."
+            "Pastikan izin kamera diberikan."
         );
 
     }
@@ -586,9 +465,7 @@ async function startCamera() {
 // PROSES KAMERA
 // ========================================
 
-async function processCamera() {
-
-    // Kalau kamera berhenti
+async function prosesKamera() {
 
     if (!running) {
 
@@ -607,18 +484,15 @@ async function processCamera() {
 
     }
 
-
     catch (error) {
 
-        console.error(
-            error
-        );
+        console.log(error);
 
     }
 
 
     requestAnimationFrame(
-        processCamera
+        prosesKamera
     );
 
 }
@@ -628,7 +502,7 @@ async function processCamera() {
 // STOP KAMERA
 // ========================================
 
-function stopCamera() {
+function stopKamera() {
 
     // =================================
     // STOP PROSES
@@ -653,7 +527,6 @@ function stopCamera() {
                 }
             );
 
-
         stream = null;
 
     }
@@ -664,7 +537,7 @@ function stopCamera() {
 
 
     // =================================
-    // HAPUS BLUR
+    // HILANGKAN BLUR
     // =================================
 
     video.classList.remove(
@@ -673,7 +546,7 @@ function stopCamera() {
 
 
     // =================================
-    // STOP BLUR SOUND
+    // STOP SOUND BLUR
     // =================================
 
     blurSound.pause();
@@ -691,22 +564,29 @@ function stopCamera() {
 
 
     // =================================
-    // RESET SOUND
+    // RESET
     // =================================
 
     bolehBunyi = true;
 
-    sedangBunyi = false;
-
-    blurAktif = false;
+    blurSedangJalan = false;
 
 
-    // =================================
-    // RESET GESTURE
-    // =================================
+    if (timerBlur) {
 
-    lastGesture =
+        clearTimeout(timerBlur);
+
+        timerBlur = null;
+
+    }
+
+
+    gestureTerakhir =
         "NORMAL";
+
+
+    status.textContent =
+        "Kamera belum aktif";
 
 }
 
@@ -717,11 +597,11 @@ function stopCamera() {
 
 startBtn.addEventListener(
     "click",
-    startCamera
+    mulaiKamera
 );
 
 
 stopBtn.addEventListener(
     "click",
-    stopCamera
-)
+    stopKamera
+);
