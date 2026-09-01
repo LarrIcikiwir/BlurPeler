@@ -1,3 +1,10 @@
+CREATE USER 'admin_atk'@'localhost' IDENTIFIED BY 'AdminATK#2026';
+CREATE USER 'kasir_atk'@'localhost' IDENTIFIED BY 'KasirATK#2026';
+CREATE USER 'gudang_atk'@'localhost' IDENTIFIED BY 'GudangATK#2026';
+CREATE USER 'akuntan_atk'@'localhost' IDENTIFIED BY 'AkuntanATK#2026';
+
+
+
 GRANT ALL PRIVILEGES ON toko_atk_kendari_jaya.* TO 'admin_atk'@'localhost';
 
 GRANT SELECT, INSERT ON toko_atk_kendari_jaya.Transaksi TO 'kasir_atk'@'localhost';
