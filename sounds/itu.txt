@@ -4,6 +4,18 @@ CREATE USER 'gudang_atk'@'localhost' IDENTIFIED BY 'GudangATK#2026';
 CREATE USER 'akuntan_atk'@'localhost' IDENTIFIED BY 'AkuntanATK#2026';
 
 
+CREATE TABLE Kategori (
+    id_kategori INT AUTO_INCREMENT PRIMARY KEY,
+    nama_kategori VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE Pelanggan (
+    id_pelanggan INT AUTO_INCREMENT PRIMARY KEY,
+    nama_pelanggan VARCHAR(100) NOT NULL,
+    alamat VARCHAR(200),
+    no_telp VARCHAR(15)
+);
+
 
 GRANT ALL PRIVILEGES ON toko_atk_kendari_jaya.* TO 'admin_atk'@'localhost';
 
