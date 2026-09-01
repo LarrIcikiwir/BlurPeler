@@ -1,1 +1,10 @@
+GRANT ALL PRIVILEGES ON toko_atk_kendari_jaya.* TO 'admin_atk'@'localhost';
 
+GRANT SELECT, INSERT ON toko_atk_kendari_jaya.Transaksi TO 'kasir_atk'@'localhost';
+GRANT SELECT, INSERT ON toko_atk_kendari_jaya.DetailTransaksi TO 'kasir_atk'@'localhost';
+
+GRANT SELECT, UPDATE ON toko_atk_kendari_jaya.Produk TO 'gudang_atk'@'localhost';
+
+GRANT SELECT ON toko_atk_kendari_jaya.* TO 'akuntan_atk'@'localhost';
+
+FLUSH PRIVILEGES;
