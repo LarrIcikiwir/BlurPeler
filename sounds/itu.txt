@@ -26,6 +26,17 @@ CREATE TABLE Pegawai (
 );
 
 
+CREATE TABLE Produk (
+    id_produk INT AUTO_INCREMENT PRIMARY KEY,
+    nama_produk VARCHAR(100) NOT NULL,
+    id_kategori INT,
+    harga DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (harga >= 0),
+    stok INT NOT NULL DEFAULT 0,
+    satuan VARCHAR(20) DEFAULT 'pcs',
+    FOREIGN KEY (id_kategori) REFERENCES Kategori(id_kategori)
+);
+
+
 
 GRANT ALL PRIVILEGES ON toko_atk_kendari_jaya.* TO 'admin_atk'@'localhost';
 
