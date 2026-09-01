@@ -117,3 +117,10 @@ ORDER BY harga ASC;
 
 -- 6. Tampilkan produk yang namanya mengandung kata 'Pensil'
 SELECT * FROM Produk WHERE nama_produk LIKE '%Pensil%';
+
+
+
+-- 7. Latihan tambahan
+SELECT * FROM Produk WHERE harga BETWEEN 3000 AND 6000 ORDER BY harga ASC;
+SELECT * FROM Produk WHERE id_kategori IN (1, 2);
+SELECT DISTINCT id_kategori FROM Produk;
