@@ -3,7 +3,7 @@ CREATE USER 'kasir_atk'@'localhost' IDENTIFIED BY 'KasirATK#2026';
 CREATE USER 'gudang_atk'@'localhost' IDENTIFIED BY 'GudangATK#2026';
 CREATE USER 'akuntan_atk'@'localhost' IDENTIFIED BY 'AkuntanATK#2026';
 
-
+--1.
 CREATE TABLE Kategori (
     id_kategori INT AUTO_INCREMENT PRIMARY KEY,
     nama_kategori VARCHAR(50) NOT NULL UNIQUE
@@ -16,7 +16,7 @@ CREATE TABLE Pelanggan (
     no_telp VARCHAR(15)
 );
 
-
+--2.
 CREATE TABLE Pegawai (
     id_pegawai INT AUTO_INCREMENT PRIMARY KEY,
     nama_pegawai VARCHAR(100) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE Pegawai (
     password VARCHAR(100) NOT NULL
 );
 
-
+-- 3.
 CREATE TABLE Produk (
     id_produk INT AUTO_INCREMENT PRIMARY KEY,
     nama_produk VARCHAR(100) NOT NULL,
@@ -35,6 +35,30 @@ CREATE TABLE Produk (
     satuan VARCHAR(20) DEFAULT 'pcs',
     FOREIGN KEY (id_kategori) REFERENCES Kategori(id_kategori)
 );
+
+
+-- 4. Buat tabel Transaksi (foreign key ke Pelanggan dan Pegawai)
+CREATE TABLE Transaksi (
+    id_transaksi INT AUTO_INCREMENT PRIMARY KEY,
+    tanggal DATE NOT NULL,
+    id_pelanggan INT,
+    id_pegawai INT NOT NULL,
+    FOREIGN KEY (id_pelanggan) REFERENCES Pelanggan(id_pelanggan),
+    FOREIGN KEY (id_pegawai) REFERENCES Pegawai(id_pegawai)
+);
+
+-- 5. Buat tabel DetailTransaksi
+CREATE TABLE DetailTransaksi (
+    id_transaksi INT,
+    id_produk INT,
+    jumlah INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_transaksi) REFERENCES Transaksi(id_transaksi) ON DELETE CASCADE,
+    FOREIGN KEY (id_produk) REFERENCES Produk(id_produk) ON DELETE RESTRICT
+);
+
+-- 6. Gunakan ALTER TABLE untuk menambah kolom email pada tabel Pelanggan
+ALTER TABLE Pelanggan ADD COLUMN email VARCHAR(100);
 
 
 
