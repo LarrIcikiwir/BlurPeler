@@ -17,6 +17,16 @@ CREATE TABLE Pelanggan (
 );
 
 
+CREATE TABLE Pegawai (
+    id_pegawai INT AUTO_INCREMENT PRIMARY KEY,
+    nama_pegawai VARCHAR(100) NOT NULL,
+    jabatan VARCHAR(30) NOT NULL,
+    username VARCHAR(30) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL
+);
+
+
+
 GRANT ALL PRIVILEGES ON toko_atk_kendari_jaya.* TO 'admin_atk'@'localhost';
 
 GRANT SELECT, INSERT ON toko_atk_kendari_jaya.Transaksi TO 'kasir_atk'@'localhost';
