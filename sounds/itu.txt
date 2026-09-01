@@ -72,3 +72,48 @@ GRANT SELECT, UPDATE ON toko_atk_kendari_jaya.Produk TO 'gudang_atk'@'localhost'
 GRANT SELECT ON toko_atk_kendari_jaya.* TO 'akuntan_atk'@'localhost';
 
 FLUSH PRIVILEGES;
+
+
+
+
+
+
+
+
+-- 1. Isi tabel Kategori dan Produk
+INSERT INTO Kategori (nama_kategori) VALUES
+('Alat Tulis'), ('Kertas'), ('Perlengkapan Kantor'), ('Tinta & Spidol'), ('Lainnya');
+
+INSERT INTO Produk (nama_produk, id_kategori, harga, stok) VALUES
+('Pensil 2B Faber-Castell', 1, 3500, 200),
+('Pulpen Standard AE7', 1, 2500, 150),
+('Kertas HVS A4 1 Rim', 2, 45000, 40),
+('Buku Tulis 38 Lembar', 2, 4000, 300),
+('Stapler No. 10', 3, 15000, 25);
+
+-- 2. Isi tabel Pelanggan dan Pegawai
+INSERT INTO Pelanggan (nama_pelanggan, alamat, no_telp) VALUES
+('Andi Saputra', 'Jl. Ahmad Yani No. 12, Kendari', '081234567890'),
+('Sri Wahyuni', 'Jl. MT Haryono No. 5, Kendari', '082198765432'),
+('Budi Hartono', 'Jl. Sultan Hasanuddin No. 8, Kendari', NULL);
+
+INSERT INTO Pegawai (nama_pegawai, jabatan, username, password) VALUES
+('Rina Marlina', 'Kasir', 'rina_kasir', 'hashed_pw_1'),
+('Doni Pratama', 'Staf Gudang', 'doni_gudang', 'hashed_pw_2'),
+('Wulan Sari', 'Admin', 'wulan_admin', 'hashed_pw_3');
+
+-- 3. Lakukan 1 UPDATE untuk mengubah harga salah satu produk
+UPDATE Produk SET harga = 4000 WHERE id_produk = 1;
+
+-- 4. Verifikasi lalu hapus data Pelanggan
+SELECT * FROM Pelanggan WHERE id_pelanggan = 3;
+DELETE FROM Pelanggan WHERE id_pelanggan = 3;
+
+-- 5. Tampilkan seluruh produk dengan stok < 50 diurutkan dari harga termurah
+SELECT nama_produk AS Produk, harga AS Harga, stok AS Stok
+FROM Produk
+WHERE stok < 50
+ORDER BY harga ASC;
+
+-- 6. Tampilkan produk yang namanya mengandung kata 'Pensil'
+SELECT * FROM Produk WHERE nama_produk LIKE '%Pensil%';
